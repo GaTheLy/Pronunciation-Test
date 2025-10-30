@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronunciation Scoring API - Test Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .input-group input[type="text"],
+        .input-group input[type="number"],
+        .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px;
+            background: #f5f5f5;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-input-label:hover {
+            background: #e8e8e8;
+            border-color: #667eea;
+        }
+
+        .file-input-label.has-file {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-record {
+            background: #f44336;
+        }
+
+        .btn-record.recording {
+            background: #ff5252;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .result-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .result-box.success {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+        }
+
+        .result-box.error {
+            background: #ffebee;
+            border: 2px solid #f44336;
+        }
+
+        .result-box pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .score-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .score-item {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .score-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .score-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .feedback-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .feedback-excellent {
+            background: #4caf50;
+            color: white;
+        }
+
+        .feedback-good {
+            background: #2196f3;
+            color: white;
+        }
+
+        .feedback-fair {
+            background: #ff9800;
+            color: white;
+        }
+
+        .feedback-poor {
+            background: #f44336;
+            color: white;
+        }
+
+        .phoneme-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .phoneme-list {
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .phoneme-list h4 {
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .phoneme-tag {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 3px;
+            background: #667eea;
+            color: white;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-online {
+            background: #4caf50;
+            box-shadow: 0 0 10px #4caf50;
+        }
+
+        .status-offline {
+            background: #f44336;
+        }
+
+        .server-status {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .alpha-slider-container {
+            margin: 15px 0;
+        }
+
+        .alpha-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .phoneme-comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .phoneme-aligned-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .aligned-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .aligned-item div:nth-child(2) { text-align: center; }
+        .aligned-item div:nth-child(3) { text-align: right; }
+        
+        .aligned-item.match {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+        }
+        
+        .aligned-item.replace {
+            background: #ffebee;
+            border-left: 5px solid #f44336;
+        }
+        
+        .aligned-item.delete {
+            background: #f5f5f5;
+            border-left: 5px solid #9e9e9e;
+            color: #777;
+        }
+        
+        .aligned-item.insert {
+            background: #e3f2fd;
+            border-left: 5px solid #2196f3;
+            grid-template-columns: 1fr 1fr; /* Inserts only have 2 columns */
+        }
+        
+        .phoneme-label {
+            font-size: 0.8em;
+            color: #666;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .aligned-item {
+                font-size: 0.9em;
+            }
+        }
+
+        .word-score-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+
+        .word-score-item {
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s;
+        }
+        
+        .word-score-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .word-score-item strong {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .word-score-good { background: linear-gradient(135deg, #4caf50, #66bb6a); }
+        .word-score-fair { background: linear-gradient(135deg, #ff9800, #ffa726); }
+        .word-score-poor { background: linear-gradient(135deg, #f44336, #ef5350); }
+
+        @media (max-width: 768px) {
+            .word-score-item {
+                font-size: 1em;
+                padding: 8px 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎤 Pronunciation Scoring API</h1>
+            <p>Test Interface - Based on Sheoran et al. (2023)</p>
+        </div>
+
+        <div class="server-status" id="serverStatus">
+            <div>
+                <span class="status-indicator status-offline" id="statusIndicator"></span>
+                <span id="statusText">Checking server...</span>
+            </div>
+            <button class="btn btn-primary" onclick="checkServerHealth()" style="width: auto; padding: 8px 16px;">
+                Refresh
+            </button>
+        </div>
+
+        <div class="grid">
+            <!-- Endpoint 1: Transcribe Audio -->
+            <div class="card">
+                <h2>
+                    <span>📝</span> Transcribe Audio
+                    <span class="badge">POST /api/transcribe</span>
+                </h2>
+                <div class="input-group">
+                    <label>Upload Audio File (WAV, MP3)</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="transcribeFile" accept="audio/*" onchange="handleFileSelect('transcribe')">
+                        <label for="transcribeFile" class="file-input-label" id="transcribeFileLabel">
+                            <span>📁</span>
+                            <span>Choose audio file</span>
+                        </label>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="transcribeAudio()" id="transcribeBtn">
+                    <span>🚀</span> Transcribe
+                </button>
+                <div class="result-box" id="transcribeResult" style="display: none;"></div>
+            </div>
+
+            <!-- Endpoint 2: Text to Phonemes -->
+            <div class="card">
+                <h2>
+                    <span>🔤</span> Text to Phonemes
+                    <span class="badge">POST /api/text_to_phonemes</span>
+                </h2>
+                <div class="input-group">
+                    <label>Enter Text</label>
+                    <textarea id="textInput" placeholder="e.g., Hello world"></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="textToPhonemes()" id="phonemesBtn">
+                    <span>🚀</span> Convert to Phonemes
+                </button>
+                <div class="result-box" id="phonemesResult" style="display: none;"></div>
+            </div>
+
+            <!-- Endpoint 3: Extract Phonemes from Audio -->
+            <div class="card">
+                <h2>
+                    <span>🎵</span> Extract Phonemes
+                    <span class="badge">POST /api/extract_phonemes</span>
+                </h2>
+                <div class="input-group">
+                    <label>Upload Audio File</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="extractFile" accept="audio/*" onchange="handleFileSelect('extract')">
+                        <label for="extractFile" class="file-input-label" id="extractFileLabel">
+                            <span>📁</span>
+                            <span>Choose audio file</span>
+                        </label>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="extractPhonemes()" id="extractBtn">
+                    <span>🚀</span> Extract Phonemes
+                </button>
+                <div class="result-box" id="extractResult" style="display: none;"></div>
+            </div>
+
+            <!-- Endpoint 4: Score Pronunciation -->
+            <div class="card" style="grid-column: 1 / -1;">
+                <h2>
+                    <span>⭐</span> Score Pronunciation (Full Pipeline)
+                    <span class="badge">POST /api/score_pronunciation</span>
+                </h2>
+                
+                <div class="input-group">
+                    <label>Target Text (What should be said)</label>
+                    <input type="text" id="targetText" placeholder="e.g., Hello, how are you today?" value="Hello world">
+                </div>
+
+                <div class="alpha-slider-container">
+                    <label>Alpha Parameter (α) - Controls scoring balance</label>
+                    <input type="range" id="alphaSlider" min="0" max="1" step="0.1" value="0.5" oninput="updateAlphaDisplay()">
+                    <div class="alpha-value" id="alphaValue">α = 0.5 (Balanced - Recommended)</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85em; color: #666; margin-top: 5px;">
+                        <span>Fluency & Pitch</span>
+                        <span>Prosody & Phones</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Upload Audio File or Record</label>
+                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px;">
+                        <div class="file-input-wrapper">
+                            <input type="file" id="scoreFile" accept="audio/*" onchange="handleFileSelect('score')">
+                            <label for="scoreFile" class="file-input-label" id="scoreFileLabel">
+                                <span>📁</span>
+                                <span>Choose audio file</span>
+                            </label>
+                        </div>
+                        <button class="btn btn-primary btn-record" onclick="toggleRecording()" id="recordBtn" style="width: 150px;">
+                            <span id="recordIcon">🎙️</span>
+                            <span id="recordText">Record</span>
+                        </button>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="scorePronunciation()" id="scoreBtn">
+                    <span>🚀</span> Score Pronunciation
+                </button>
+
+                <div id="scoreResult" style="display: none;">
+                    <div class="score-display" id="scoreDisplay"></div>
+                    <div class="feedback-box" id="feedbackBox"></div>
+
+                    <div class="word-score-display" id="wordScoreDisplay"></div>
+                    
+                    <div class="phoneme-comparison" id="phonemeComparison"></div>
+                    <div class="result-box success" id="scoreDetails"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <script>
+        const API_BASE_URL = 'http://localhost:5001/api'; // Make sure this port is correct!
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordedBlob = null;
+
+        // Check server health on load
+        window.onload = () => {
+            checkServerHealth();
+        };
+
+        async function checkServerHealth() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+                
+                document.getElementById('statusIndicator').className = 'status-indicator status-online';
+                document.getElementById('statusText').textContent = `Server Online - Model: ${data.model}`;
+            } catch (error) {
+                document.getElementById('statusIndicator').className = 'status-indicator status-offline';
+                document.getElementById('statusText').textContent = 'Server Offline - Please start the server';
+            }
+        }
+
+        function handleFileSelect(type) {
+            const fileInput = document.getElementById(`${type}File`);
+            const label = document.getElementById(`${type}FileLabel`);
+            
+            if (fileInput.files.length > 0) {
+                const fileName = fileInput.files[0].name;
+                label.innerHTML = `<span>✅</span><span>${fileName}</span>`;
+                label.classList.add('has-file');
+                
+                if (type === 'score') {
+                    recordedBlob = null; // Clear recorded audio if file is uploaded
+                }
+            }
+        }
+
+        function updateAlphaDisplay() {
+            const alpha = document.getElementById('alphaSlider').value;
+            let description = '';
+            
+            if (alpha == 0.5) description = '(Balanced)';
+            else if (alpha < 0.5) description = '(More emphasis on fluency)';
+            else description = '(More emphasis on prosody)';
+            
+            document.getElementById('alphaValue').textContent = `α = ${alpha} ${description}`;
+        }
+
+        async function toggleRecording() {
+            const btn = document.getElementById('recordBtn');
+            const icon = document.getElementById('recordIcon');
+            const text = document.getElementById('recordText');
+            const scoreBtn = document.getElementById('scoreBtn'); // Get the score button
+
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        recordedBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const label = document.getElementById('scoreFileLabel');
+
+                        // --- ADD THIS CHECK ---
+                        if (recordedBlob.size < 1024) { // 1KB minimum
+                            alert("Recording was too short. Please try again and record for at least 1 second.");
+                            recordedBlob = null;
+                            label.innerHTML = `<span>📁</span><span>Choose audio file</span>`;
+                            label.classList.remove('has-file');
+                        } else {
+                            label.innerHTML = `<span>🎙️</span><span>Recorded audio ready (${(recordedBlob.size / 1024).toFixed(1)} KB)</span>`;
+                            label.classList.add('has-file');
+                            document.getElementById('scoreFile').value = '';
+                        }
+                        // --- END OF CHECK ---
+
+                        scoreBtn.disabled = false; // Re-enable score button
+                    };
+
+                    mediaRecorder.start();
+                    scoreBtn.disabled = true; // Disable score button while recording
+                    btn.classList.add('recording');
+                    icon.textContent = '⏹️';
+                    text.textContent = 'Stop';
+
+                } catch (error) {
+                    alert('Could not access microphone: ' + error.message);
+                    scoreBtn.disabled = false; // Re-enable score button if mic fails
+                }
+            } else {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                btn.classList.remove('recording');
+                icon.textContent = '🎙️';
+                text.textContent = 'Record';
+            }
+        }
+        
+        // --- REMOVED transcribeAudio, textToPhonemes, extractPhonemes ---
+        // --- The new server only has one endpoint. ---
+
+        async function scorePronunciation() {
+            const targetText = document.getElementById('targetText').value.trim();
+            const alpha = document.getElementById('alphaSlider').value;
+            const fileInput = document.getElementById('scoreFile');
+            const resultDiv = document.getElementById('scoreResult');
+            const btn = document.getElementById('scoreBtn');
+
+            if (!targetText) {
+                alert('Please enter target text');
+                return;
+            }
+
+            let audioFile;
+            if (recordedBlob) {
+                audioFile = new File([recordedBlob], 'recording.wav', { type: 'audio/wav' });
+            } else if (fileInput.files[0]) {
+                audioFile = fileInput.files[0];
+            } else {
+                alert('Please upload an audio file or record your voice');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('audio', audioFile);
+            formData.append('text', targetText);
+            formData.append('alpha', alpha); // Backend doesn't use this, but form expects it
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Analyzing...';
+            resultDiv.style.display = 'block';
+
+            // Clear old results
+            document.getElementById('scoreDisplay').innerHTML = '';
+            document.getElementById('feedbackBox').innerHTML = '';
+            document.getElementById('wordScoreDisplay').innerHTML = ''; /* <-- ADD THIS LINE */
+            document.getElementById('phonemeComparison').innerHTML = '';
+            document.getElementById('scoreDetails').innerHTML = '';
+
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/score_pronunciation`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayScoreResults(data);
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (error) {
+                document.getElementById('scoreDetails').className = 'result-box error';
+                document.getElementById('scoreDetails').innerHTML = `<strong>Error:</strong> ${error.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>🚀</span> Score Pronunciation';
+            }
+        }
+
+        // --- *** NEW DISPLAY FUNCTION WITH ALIGNMENT *** ---
+        function displayScoreResults(data) {
+            
+            // Display Total Score
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            scoreDisplay.innerHTML = `
+                <div class="score-item" style="grid-column: 1 / -1;">
+                    <div class="score-label">Overall Accuracy Score</div>
+                    <div class="score-value">${data.total_score.toFixed(1)}%</div>
+                </div>
+            `;
+
+            // Display feedback
+            const feedbackBox = document.getElementById('feedbackBox');
+            let feedbackClass = 'feedback-poor';
+            if (data.total_score >= 85) feedbackClass = 'feedback-excellent';
+            else if (data.total_score >= 70) feedbackClass = 'feedback-good';
+            else if (data.total_score >= 50) feedbackClass = 'feedback-fair';
+            
+            feedbackBox.className = `feedback-box ${feedbackClass}`;
+            feedbackBox.textContent = data.feedback;
+
+            const wordScoreDisplay = document.getElementById('wordScoreDisplay');
+            wordScoreDisplay.innerHTML = ''; // Clear just in case
+            
+            if (data.word_level_scores && data.word_level_scores.length > 0) {
+                // Add a small title
+                const title = document.createElement('h3');
+                title.textContent = 'Word-by-Word Scoring';
+                title.style.color = '#333';
+                title.style.width = '100%';
+                title.style.textAlign = 'center';
+                title.style.marginBottom = '5px';
+                wordScoreDisplay.appendChild(title);
+
+                data.word_level_scores.forEach(item => {
+                    let scoreClass = 'word-score-poor';
+                    if (item.score >= 85) scoreClass = 'word-score-good';
+                    else if (item.score >= 50) scoreClass = 'word-score-fair';
+                    
+                    const wordEl = document.createElement('div');
+                    wordEl.className = `word-score-item ${scoreClass}`;
+                    wordEl.innerHTML = `<span>${item.word}</span> <strong>${item.score.toFixed(0)}%</strong>`;
+                    wordScoreDisplay.appendChild(wordEl);
+                });
+            }
+
+            // --- Build the new aligned phoneme list ---
+            const phonemeComparison = document.getElementById('phonemeComparison');
+            
+            // Clear old boxes
+            phonemeComparison.innerHTML = '';
+            
+            const listContainer = document.createElement('div');
+            listContainer.className = 'phoneme-aligned-list';
+            listContainer.style.gridColumn = '1 / -1'; // Make it span full width
+            
+            data.aligned_scores.forEach(item => {
+                const el = document.createElement('div');
+                el.className = `aligned-item ${item.type}`;
+                
+                let html = '';
+                
+                switch (item.type) {
+                    case 'match':
+                        html = `
+                            <div><span class="phoneme-label">Target</span>${item.target}</div>
+                            <div>✅</div>
+                            <div><span class="phoneme-label">Score</span>${item.score.toFixed(0)}%</div>
+                        `;
+                        break;
+                    case 'replace':
+                        html = `
+                            <div><span class="phoneme-label">Target</span>${item.target}</div>
+                            <div><span class="phoneme-label">You said</span>${item.actual}</div>
+                            <div><span class="phoneme-label">Confidence</span>${item.score.toFixed(0)}%</div>
+                        `;
+                        break;
+                    case 'delete':
+                        html = `
+                            <div><span class="phoneme-label">Target</span>${item.target}</div>
+                            <div><span class="phoneme-label">You said</span>-</div>
+                            <div><span class="phoneme-label">Score</span>0%</div>
+                        `;
+                        break;
+                    case 'insert':
+                        html = `
+                            <div style="grid-column: 1 / 3;"><span class="phoneme-label">Extra Sound</span>${item.actual}</div>
+                            <div><span class="phoneme-label">Confidence</span>${item.score.toFixed(0)}%</div>
+                        `;
+                        break;
+                }
+                el.innerHTML = html;
+                listContainer.appendChild(el);
+            });
+            
+            phonemeComparison.appendChild(listContainer);
+
+            // Display detailed results
+            document.getElementById('scoreDetails').className = 'result-box success';
+            document.getElementById('scoreDetails').innerHTML = `
+                <h3>Detailed Results:</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+        }
+    </script>
+</body>
+</html>

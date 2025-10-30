@@ -1,0 +1,35 @@
+# Python Pronunciation Scoring System Requirements
+# Based on: "Pronunciation Scoring With Goodness of Pronunciation and Dynamic Time Warping"
+
+# Core Framework
+flask>=2.3.0
+flask-cors>=4.0.0
+
+# Audio Processing
+librosa>=0.10.0
+soundfile>=0.12.0
+praat-parselmouth>=0.4.0
+
+# Speech Recognition & NLP
+transformers>=4.35.0
+torch>=2.0.0
+g2p-en>=2.1.0
+
+# DTW Algorithm
+fastdtw>=0.3.4
+scipy>=1.11.0
+
+# Text-to-Speech
+gTTS>=2.4.0
+
+# Utilities
+numpy>=1.24.0
+requests>=2.31.0
+
+# For better audio handling
+pydub>=0.25.0
+
+phonemizer
+protobuf
+
+levenshtein
